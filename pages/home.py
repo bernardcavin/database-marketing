@@ -6,7 +6,7 @@ from furl import furl
 from utils.components import HomePage, tabel, Page, PageGroup
 from app import db
 import pandas as pd
-from pages.subpage import employees, inventory, purchase_orders, jobs, hoc, vendors, clients
+from pages.subpage import employees, inventory, purchase_orders, hoc, vendors, clients
 
 home_page = HomePage()
 

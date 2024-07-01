@@ -10,10 +10,10 @@ from flask_login import UserMixin
 
 db = SQLAlchemy()
 
-job_employee_association = Table('job_employee', db.metadata,
-    Column('job_id', String(36), ForeignKey('jobs.job_id')),
-    Column('employee_id', String(36), ForeignKey('employees.id'))
-)
+# job_employee_association = Table('job_employee', db.metadata,
+#     Column('job_id', String(36), ForeignKey('jobs.job_id')),
+#     Column('employee_id', String(36), ForeignKey('employees.id'))
+# )
 
 class Employee(UserMixin,db.Model):
     
@@ -28,7 +28,7 @@ class Employee(UserMixin,db.Model):
     position = Column(String(50))
     email = Column(String(120))
     logs = relationship('Log', back_populates='employee', cascade="all, delete-orphan")
-    jobs = relationship("Job", secondary=job_employee_association, back_populates="employees")
+    #jobs = relationship("Job", secondary=job_employee_association, back_populates="employees")
     hocs = relationship("HazardObservationCard", back_populates="employee")
 
     def __init__(self, username, password, admin, name, nik, position, email):
@@ -330,96 +330,96 @@ class HazardObservationCard(db.Model):
         self.pengendalian = pengendalian
         self.tindakan_perbaikan = tindakan_perbaikan
 
-class Job(db.Model):
-    __tablename__ = 'jobs'
+# class Job(db.Model):
+#     __tablename__ = 'jobs'
 
-    job_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    job_title = Column(String(50), nullable=False)
-    plan_start_date = Column(Date, nullable=False)
-    plan_end_date = Column(Date, nullable=False)
-    actual_start_date = Column(Date, nullable=False)
-    actual_end_date = Column(Date, nullable=False)
-    job_desc = Column(Float, nullable=False)
-    job_service_type = Column(String(50), nullable=False)
-    shipments = relationship("Shipment", back_populates="job")
-    daily_reports = relationship("DailyReport", back_populates="job")
-    basts = relationship("BAST", back_populates="job")
-    hsse_reports = relationship("HSSE", back_populates="job")
-    employees = relationship("Employee", secondary=job_employee_association, back_populates="jobs")
+#     job_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+#     job_title = Column(String(50), nullable=False)
+#     plan_start_date = Column(Date, nullable=False)
+#     plan_end_date = Column(Date, nullable=False)
+#     actual_start_date = Column(Date, nullable=False)
+#     actual_end_date = Column(Date, nullable=False)
+#     job_desc = Column(Float, nullable=False)
+#     job_service_type = Column(String(50), nullable=False)
+#     shipments = relationship("Shipment", back_populates="job")
+#     daily_reports = relationship("DailyReport", back_populates="job")
+#     basts = relationship("BAST", back_populates="job")
+#     hsse_reports = relationship("HSSE", back_populates="job")
+#     employees = relationship("Employee", secondary=job_employee_association, back_populates="jobs")
 
-    def __init__(self, job_title, plan_start_date, plan_end_date, actual_start_date, actual_end_date, job_desc, job_service_type):
-        self.job_id = str(uuid.uuid4())
-        self.job_title = job_title
-        self.plan_start_date = plan_start_date
-        self.plan_end_date = plan_end_date
-        self.actual_start_date = actual_start_date
-        self.actual_end_date = actual_end_date
-        self.job_desc = job_desc
-        self.job_service_type = job_service_type
-
-
-class Shipment(db.Model):
-    __tablename__ = 'shipments'
-
-    shipment_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    job_id = Column(String(36), ForeignKey('jobs.job_id'), nullable=False)
-    tool_name = Column(String(50), nullable=False)
-    quantity = Column(Integer, nullable=False)
-    direction = Column(String(10), nullable=False)  # 'in' or 'out'
-    date = Column(Date, nullable=False)
-    job = relationship("Job", back_populates="shipments")
-
-    def __init__(self, job_id, tool_name, quantity, direction, date):
-        self.shipment_id = str(uuid.uuid4())
-        self.job_id = job_id
-        self.tool_name = tool_name
-        self.quantity = quantity
-        self.direction = direction
-        self.date = date
-
-class DailyReport(db.Model):
-    __tablename__ = 'daily_reports'
-
-    report_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    job_id = Column(String(36), ForeignKey('jobs.job_id'), nullable=False)
-    report_date = Column(Date, nullable=False)
-    report_content = Column(Text, nullable=False)
-    job = relationship("Job", back_populates="daily_reports")
-
-    def __init__(self, job_id, report_date, report_content):
-        self.report_id = str(uuid.uuid4())
-        self.job_id = job_id
-        self.report_date = report_date
-        self.report_content = report_content
+#     def __init__(self, job_title, plan_start_date, plan_end_date, actual_start_date, actual_end_date, job_desc, job_service_type):
+#         self.job_id = str(uuid.uuid4())
+#         self.job_title = job_title
+#         self.plan_start_date = plan_start_date
+#         self.plan_end_date = plan_end_date
+#         self.actual_start_date = actual_start_date
+#         self.actual_end_date = actual_end_date
+#         self.job_desc = job_desc
+#         self.job_service_type = job_service_type
 
 
-class BAST(db.Model):
-    __tablename__ = 'basts'
+# class Shipment(db.Model):
+#     __tablename__ = 'shipments'
 
-    bast_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    job_id = Column(String(36), ForeignKey('jobs.job_id'), nullable=False)
-    bast_date = Column(Date, nullable=False)
-    bast_details = Column(Text, nullable=False)
-    job = relationship("Job", back_populates="basts")
+#     shipment_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+#     job_id = Column(String(36), ForeignKey('jobs.job_id'), nullable=False)
+#     tool_name = Column(String(50), nullable=False)
+#     quantity = Column(Integer, nullable=False)
+#     direction = Column(String(10), nullable=False)  # 'in' or 'out'
+#     date = Column(Date, nullable=False)
+#     job = relationship("Job", back_populates="shipments")
 
-    def __init__(self, job_id, bast_date, bast_details):
-        self.bast_id = str(uuid.uuid4())
-        self.job_id = job_id
-        self.bast_date = bast_date
-        self.bast_details = bast_details
+#     def __init__(self, job_id, tool_name, quantity, direction, date):
+#         self.shipment_id = str(uuid.uuid4())
+#         self.job_id = job_id
+#         self.tool_name = tool_name
+#         self.quantity = quantity
+#         self.direction = direction
+#         self.date = date
+
+# class DailyReport(db.Model):
+#     __tablename__ = 'daily_reports'
+
+#     report_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+#     job_id = Column(String(36), ForeignKey('jobs.job_id'), nullable=False)
+#     report_date = Column(Date, nullable=False)
+#     report_content = Column(Text, nullable=False)
+#     job = relationship("Job", back_populates="daily_reports")
+
+#     def __init__(self, job_id, report_date, report_content):
+#         self.report_id = str(uuid.uuid4())
+#         self.job_id = job_id
+#         self.report_date = report_date
+#         self.report_content = report_content
 
 
-class HSSE(db.Model):
-    __tablename__ = 'hsse_reports'
+# class BAST(db.Model):
+#     __tablename__ = 'basts'
 
-    hsse_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    job_id = Column(String(36), ForeignKey('jobs.job_id'), nullable=False)
-    report_date = Column(Date, nullable=False)
-    report_content = Column(Text, nullable=False)
-    job = relationship("Job", back_populates="hsse_reports")
+#     bast_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+#     job_id = Column(String(36), ForeignKey('jobs.job_id'), nullable=False)
+#     bast_date = Column(Date, nullable=False)
+#     bast_details = Column(Text, nullable=False)
+#     job = relationship("Job", back_populates="basts")
 
-    def __init__(self, job_id, report_date, report_content):
-        self.hsse_id = str(uuid.uuid4())
-        self.job_id = job_id
-        self.report_date = report_date
-        self.report_content = report_content
+#     def __init__(self, job_id, bast_date, bast_details):
+#         self.bast_id = str(uuid.uuid4())
+#         self.job_id = job_id
+#         self.bast_date = bast_date
+#         self.bast_details = bast_details
+
+
+# class HSSE(db.Model):
+    # __tablename__ = 'hsse_reports'
+
+    # hsse_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    # job_id = Column(String(36), ForeignKey('jobs.job_id'), nullable=False)
+    # report_date = Column(Date, nullable=False)
+    # report_content = Column(Text, nullable=False)
+    # job = relationship("Job", back_populates="hsse_reports")
+
+    # def __init__(self, job_id, report_date, report_content):
+    #     self.hsse_id = str(uuid.uuid4())
+    #     self.job_id = job_id
+    #     self.report_date = report_date
+    #     self.report_content = report_content

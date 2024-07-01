@@ -26,7 +26,7 @@ app = dash.Dash(
 
 USERNAME = os.getenv("USERNAME")
 PASSWORD = os.getenv("PASSWORD")
-HOST = os.getenv("HOST")
+HOST = os.getenv("DBHOST")
 DATABASE = os.getenv("DATABASE")
 
 app.server.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -107,4 +107,4 @@ def display_page(pathname,href):
 
 
 if __name__ == "__main__":
-    app.run(debug=True)#debug=True,
+    app.run(debug=True,host='localhost')#debug=True,
