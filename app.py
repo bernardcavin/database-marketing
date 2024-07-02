@@ -116,4 +116,4 @@ def display_page(pathname,href):
 
 
 if __name__ == "__main__":
-    app.run(debug=True,host='localhost')#debug=True,
+    app.run(host='192.168.1.22')#debug=True,
