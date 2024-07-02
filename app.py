@@ -88,10 +88,16 @@ from pages import home,login
 def display_page(pathname,href):
     view = None
     url = dash.no_update
-    if pathname in ['/','/login','/dashboard']:
+    if pathname in ['/','/login']:
         if current_user.is_authenticated:
             view = home.layout()
             url = '/dashboard'
+        else:
+            view = login.layout
+            url = '/login'
+    elif pathname == '/dashboard':
+        if current_user.is_authenticated:
+            view = home.layout()
         else:
             view = login.layout
             url = '/login'

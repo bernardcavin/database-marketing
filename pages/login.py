@@ -130,7 +130,7 @@ clientside_callback(
     function(n) {
         if (n == 1) {
             setTimeout(function() {
-                window.location.href = "/?p=home";
+                window.location.href = "/dashboard?p=home";
             }, 2000);
         }
         return window.dash_clientside.no_update;

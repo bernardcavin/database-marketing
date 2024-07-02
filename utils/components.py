@@ -167,20 +167,20 @@ class HomePage:
 
         clientside_callback(
             """
-            function updateLoadingState(n_clicks) {
+            function updateLoadingState(href) {
+                console.log(href);
                 return true
             }
             """,
-            Output("loading-overlay", "visible", allow_duplicate=True),
+            Output("loading-overlay-dashboard", "visible", allow_duplicate=True),
             Input('dashboard-url','href'),
             prevent_initial_call=True,
         )
 
         @callback(
             Output('subpage-container','children'),
-            Output("loading-overlay", "visible", allow_duplicate=True),
-            Input('url','href'),
-            prevent_initial_call=True,
+            Output("loading-overlay-dashboard", "visible"),
+            Input('dashboard-url','href'),
         )
         def navigation(href):
 
@@ -438,8 +438,8 @@ class HomePage:
                     dmc.Container(
                         html.Div(
                             [
-                                dmc.LoadingOverlay(visible=True,loaderProps={"type": "bars","size": "xl"},id="loading-overlay"),
-                                html.Div(id='subpage-container')
+                                dmc.LoadingOverlay(visible=False,loaderProps={"type": "bars","size": "xl"},id="loading-overlay-dashboard"),
+                                html.Div(self.render_page(self.navs[0]),id='subpage-container')
                             ],
                         ),
                         p=0,
