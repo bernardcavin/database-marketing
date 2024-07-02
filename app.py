@@ -1,6 +1,8 @@
 import os
 from flask import Flask
 from flask_login import LoginManager, current_user, logout_user
+from dotenv import load_dotenv
+load_dotenv()
 
 import dash
 from dash import dcc, html, Input, Output, State
@@ -23,10 +25,10 @@ app = dash.Dash(
     __name__, server=server, suppress_callback_exceptions=True, external_stylesheets=stylesheets, update_title=None, external_scripts=external_scripts
 )
 
-USERNAME = os.getenv("USERNAME")
-PASSWORD = os.getenv("PASSWORD")
-HOST = os.getenv("DBHOST")
-DATABASE = os.getenv("DATABASE")
+USERNAME = os.getenv("dbUSERNAME")
+PASSWORD = os.getenv("dbPASSWORD")
+HOST = os.getenv("dbHOST")
+DATABASE = os.getenv("dbDATABASE")
 
 app.server.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.server.config["SQLALCHEMY_DATABASE_URI"] = f"mysql://{USERNAME}:{PASSWORD}@{HOST}/{DATABASE}"
