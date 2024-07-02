@@ -1,5 +1,5 @@
 
-from dash import Input, Output, State, callback, ALL, clientside_callback
+from dash import Input, Output, State, callback, ALL, clientside_callback, dcc, html
 import dash_mantine_components as dmc
 from furl import furl
 from dash_iconify import DashIconify
@@ -140,12 +140,15 @@ class HomePage:
     def initiate_callbacks(self):
 
         group_dict = {}
+        navs = []
+        groups = []
 
         for nav in self.navs:
         
             if nav.__type__ == 'page':
 
                 self.pages.append(nav)
+                navs.append(nav.path)
 
             elif nav.__type__ == 'pagegroup':
 
@@ -154,47 +157,38 @@ class HomePage:
                     group_dict[page.path]=nav.name
 
                     self.pages.append(page)
+                    navs.append(page.path)
+                
+                groups.append(nav.name)
 
         page_dict = {
             item.path:item for item in self.pages
         }
 
-        @callback(
-            Output({'nav-phone':ALL},'active'),
-            Output({'nav-desktop':ALL},'active'),
-            Output('subpage-container','children'),
-            Output({'group':ALL},'value'),
-            Input('url','href'),
-            State({'nav-desktop':ALL},'id'),
-            State({'group':ALL},'id'),
+        clientside_callback(
+            """
+            function updateLoadingState(n_clicks) {
+                return true
+            }
+            """,
+            Output("loading-overlay", "visible", allow_duplicate=True),
+            Input('dashboard-url','href'),
+            prevent_initial_call=True,
         )
-        def navigation(href, ids, group_ids):
+
+        @callback(
+            Output('subpage-container','children'),
+            Output("loading-overlay", "visible", allow_duplicate=True),
+            Input('url','href'),
+            prevent_initial_call=True,
+        )
+        def navigation(href):
 
             try:
                 f = furl(href)
                 nav_page_path = f.args['p']
             except:
                 nav_page_path = 'home'
-
-            #navigation output
-
-            nav_output = [False for n in range(len(ids))]
-
-            try:
-                nav_output[[id['nav-desktop'] for id in ids].index(nav_page_path)] = True
-            except:
-                pass
-            
-            try:
-
-                #group output
-                group_output = [None for n in range(len(group_ids))]
-                group_output[[group_id['group'] for group_id in group_ids].index(group_dict[nav_page_path])] = group_dict[nav_page_path]
-
-            except:
-
-                group_output = [None for n in range(len(group_ids))]
-
 
             from flask_login import current_user
 
@@ -224,8 +218,31 @@ class HomePage:
             
             page_output = self.render_page(page_output)         
 
-            return nav_output,nav_output, page_output, group_output
-        
+            return page_output, False
+
+        @callback(
+            [Output(f'nav-phone-{nav}','active') for nav in navs]+[Output(f'nav-desktop-{nav}','active') for nav in navs]+[Output(f'group-phone-{group}','active') for group in groups]+[Output(f'group-desktop-{group}','active') for group in groups],
+            [Input('dashboard-url','href'),tuple([State(f'nav-desktop-{nav}','id') for nav in navs]),tuple([State(f'group-desktop-{group}','id') for group in groups])],
+        )
+        def activate_nav(href, nav_ids, group_ids):
+
+            try:
+                f = furl(href)
+                nav_page_path = f.args['p']
+            except:
+                nav_page_path = 'home'
+
+            nav_output = [False for n in range(len(nav_ids))]
+            group_output = [None for n in range(len(groups))]
+
+            try:
+                nav_output[[id.split('nav-desktop-')[1] for id in nav_ids].index(nav_page_path)] = True
+                group_output[[group_id.split('group-desktop-')[1] for group_id in group_ids].index(group_dict[nav_page_path])] = group_dict[nav_page_path]
+            except:
+                pass
+            
+            return nav_output+nav_output+group_output+group_output
+
         clientside_callback(
             """
             function(n) {
@@ -249,7 +266,6 @@ class HomePage:
             Output("drawer-nav", 'opened'),
             Input('burger', 'n_clicks')
         )
-
 
     def render(self):
 
@@ -275,7 +291,7 @@ class HomePage:
                                     leftSection=DashIconify(icon=nav.icon, height=16),
                                     px=PADDING,
                                     variant='filled',
-                                    id={f'nav-{type}':nav.path},
+                                    id=f'nav-{type}-{nav.path}',
                                     href=f'?p={nav.path}',
                                     c='white',
                                     color='black',
@@ -292,7 +308,7 @@ class HomePage:
                                 leftSection=DashIconify(icon=nav.icon, height=16),
                                 px=PADDING,
                                 variant='filled',
-                                id={f'nav-{type}':nav.path},
+                                id=f'nav-{type}-{nav.path}',
                                 href=f'?p={nav.path}',
                                 c='white',
                                 color='black',
@@ -320,7 +336,7 @@ class HomePage:
                                         label=page.name,
                                         leftSection=DashIconify(icon=page.icon, height=16),
                                         variant='filled',
-                                        id={f'nav-{type}':page.path},
+                                        id=f'nav-{type}-{page.path}',
                                         href=f'?p={page.path}',
                                         c='white',
                                         color='black',
@@ -337,7 +353,7 @@ class HomePage:
                                     label=page.name,
                                     leftSection=DashIconify(icon=page.icon, height=16),
                                     variant='filled',
-                                    id={f'nav-{type}':page.path},
+                                    id=f'nav-{type}-{page.path}',
                                     href=f'?p={page.path}',
                                     c='white',
                                     color='black',
@@ -384,7 +400,7 @@ class HomePage:
                                 p=0,
                                 m=0,
                             ),
-                            id={'group':nav.name}
+                            id=f'group-{type}-{nav.name}'
                         )
                     )       
 
@@ -392,6 +408,7 @@ class HomePage:
 
         layout = dmc.AppShell(
             [
+                dcc.Location(id='dashboard-url', refresh=False),
                 dmc.AppShellHeader(
                     dmc.Center(
                         dmc.Group(
@@ -419,12 +436,18 @@ class HomePage:
                 dmc.AppShellNavbar(render_navigation('desktop'),bg=NAVBAR_COLOR,className='navbar closed', id='navbar'),
                 dmc.AppShellMain(children=[
                     dmc.Container(
-                        id='subpage-container',
+                        html.Div(
+                            [
+                                dmc.LoadingOverlay(visible=True,loaderProps={"type": "bars","size": "xl"},id="loading-overlay"),
+                                html.Div(id='subpage-container')
+                            ],
+                        ),
                         p=0,
                         m=0,
                         fluid=True,
+                        pos="relative",
                     )
-                ],className='container closed', bg=dmc.DEFAULT_THEME["colors"]["gray"][1], id='container'),
+                ],className='container closed', id='container',pos="relative"),
             ],
             header={"height": HEADER_HEIGHT},
             padding="xl",
