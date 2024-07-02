@@ -77,3 +77,9 @@
 ._dash-loading {
   display: none;
 }
+
+.fade-out {
+  visibility: hidden;
+  opacity: 0;
+  transition: visibility 0s 1s, opacity 1s linear;
+}

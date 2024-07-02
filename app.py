@@ -1,4 +1,5 @@
 import os
+import dash._dash_renderer
 from flask import Flask
 from flask_login import LoginManager, current_user, logout_user
 from dotenv import load_dotenv
@@ -8,6 +9,8 @@ import dash
 from dash import dcc, html, Input, Output, State
 import dash_mantine_components as dmc
 from utils.models import db, Employee
+
+dash._dash_renderer._set_react_version('18.2.0')
 
 stylesheets = [
     "https://unpkg.com/@mantine/dates@7/styles.css",
@@ -116,4 +119,4 @@ def display_page(pathname,href):
 
 
 if __name__ == "__main__":
-    app.run(host='192.168.1.22')#debug=True,
+    app.run(debug=True,host='localhost')#debug=True,

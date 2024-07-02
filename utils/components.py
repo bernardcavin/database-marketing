@@ -168,18 +168,17 @@ class HomePage:
         clientside_callback(
             """
             function updateLoadingState(href) {
-                console.log(href);
-                return true
+                return null
             }
             """,
-            Output("loading-overlay-dashboard", "visible", allow_duplicate=True),
+            Output("loading-overlay-dashboard", "className", allow_duplicate=True),
             Input('dashboard-url','href'),
             prevent_initial_call=True,
         )
 
         @callback(
             Output('subpage-container','children'),
-            Output("loading-overlay-dashboard", "visible"),
+            Output("loading-overlay-dashboard", "className"),
             Input('dashboard-url','href'),
         )
         def navigation(href):
@@ -218,10 +217,10 @@ class HomePage:
             
             page_output = self.render_page(page_output)         
 
-            return page_output, False
+            return page_output, 'fade-out'
 
         @callback(
-            [Output(f'nav-phone-{nav}','active') for nav in navs]+[Output(f'nav-desktop-{nav}','active') for nav in navs]+[Output(f'group-phone-{group}','active') for group in groups]+[Output(f'group-desktop-{group}','active') for group in groups],
+            [Output(f'nav-phone-{nav}','active') for nav in navs]+[Output(f'nav-desktop-{nav}','active') for nav in navs]+[Output(f'group-phone-{group}','active') for group in groups]+[Output(f'group-desktop-{group}','value') for group in groups],
             [Input('dashboard-url','href'),tuple([State(f'nav-desktop-{nav}','id') for nav in navs]),tuple([State(f'group-desktop-{group}','id') for group in groups])],
         )
         def activate_nav(href, nav_ids, group_ids):
@@ -238,9 +237,10 @@ class HomePage:
             try:
                 nav_output[[id.split('nav-desktop-')[1] for id in nav_ids].index(nav_page_path)] = True
                 group_output[[group_id.split('group-desktop-')[1] for group_id in group_ids].index(group_dict[nav_page_path])] = group_dict[nav_page_path]
+
             except:
                 pass
-            
+
             return nav_output+nav_output+group_output+group_output
 
         clientside_callback(
@@ -438,7 +438,7 @@ class HomePage:
                     dmc.Container(
                         html.Div(
                             [
-                                dmc.LoadingOverlay(visible=False,loaderProps={"type": "bars","size": "xl"},id="loading-overlay-dashboard"),
+                                dmc.LoadingOverlay(visible=True,overlayProps={'bg':'white'},loaderProps={'type':'bars',"size": "xl",'color':NAVBAR_COLOR},id="loading-overlay-dashboard"),
                                 html.Div(self.render_page(self.navs[0]),id='subpage-container')
                             ],
                         ),

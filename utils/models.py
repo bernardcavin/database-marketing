@@ -357,7 +357,6 @@ class HazardObservationCard(db.Model):
 #         self.job_desc = job_desc
 #         self.job_service_type = job_service_type
 
-
 # class Shipment(db.Model):
 #     __tablename__ = 'shipments'
 
@@ -392,7 +391,6 @@ class HazardObservationCard(db.Model):
 #         self.report_date = report_date
 #         self.report_content = report_content
 
-
 # class BAST(db.Model):
 #     __tablename__ = 'basts'
 
@@ -408,7 +406,6 @@ class HazardObservationCard(db.Model):
 #         self.bast_date = bast_date
 #         self.bast_details = bast_details
 
-
 # class HSSE(db.Model):
     # __tablename__ = 'hsse_reports'
 
@@ -423,3 +420,28 @@ class HazardObservationCard(db.Model):
     #     self.job_id = job_id
     #     self.report_date = report_date
     #     self.report_content = report_content
+
+class NCNP(db.Model):
+
+    __tablename__= 'ncnp'
+
+    ncnp_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+
+    regional = Column(String(50), nullable=False)
+    zona = Column(String(50), nullable=False)
+    challenge_type = Column(String(50), nullable=False)
+    description = Column(Text, nullable=False)
+    pic = Column(String(50), nullable=False)
+    teknologi = Column(String(50), nullable=False)
+    provider = Column(String(50), nullable=False)
+
+    def __init__(self, regional, zona, challenge_type, description, pic, teknologi, provider):
+        
+        self.regional = regional
+        self.zona = zona
+        self.challenge_type = challenge_type
+        self.description = description
+        self.pic = pic
+        self.teknologi = teknologi
+        self.provider = provider
+
