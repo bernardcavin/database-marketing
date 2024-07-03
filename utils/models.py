@@ -430,18 +430,18 @@ class NCNP(db.Model):
     regional = Column(String(50), nullable=False)
     zona = Column(String(50), nullable=False)
     challenge_type = Column(String(50), nullable=False)
-    description = Column(Text, nullable=False)
+    description = Column(Text)
     pic = Column(String(50), nullable=False)
-    teknologi = Column(String(50), nullable=False)
-    provider = Column(String(50), nullable=False)
+    technology = Column(String(50), nullable=False)
+    provider = Column(String(50))
 
-    def __init__(self, regional, zona, challenge_type, description, pic, teknologi, provider):
+    def __init__(self, regional, zona, challenge_type, description, pic, technology, provider):
         
         self.regional = regional
         self.zona = zona
         self.challenge_type = challenge_type
         self.description = description
         self.pic = pic
-        self.teknologi = teknologi
+        self.technology = technology
         self.provider = provider
 

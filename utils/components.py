@@ -483,7 +483,8 @@ def tabel(
         "field": "no",
         "sortable": True,
         "pinned" : "left",
-        "width" : 70
+        "minWidth" : 70,
+        "resizable": False,
     }
 
     action_column = {
@@ -491,7 +492,8 @@ def tabel(
         "field": "Action",
         "cellRenderer": "ActionButton",
         "pinned" : "right",
-        'width': len(action_buttons)*30 + 10
+        'minWidth': len(action_buttons)*50,
+        "resizable": False,
     }
 
     columnDefs = [
@@ -513,7 +515,7 @@ def tabel(
         defaultColDef={
             "sortable": True,
             "editable": False,
-            "resizable": False,
+            "resizable": True,
             "suppressMovable": True,
             "minWidth":0
         },

@@ -5,11 +5,69 @@ from utils.models import Item, File
 import base64
 import pandas as pd
 import uuid
-from utils.models import Item, File, TempFile, Vendor, Contact, Employee, Product, OutgoingPurchaseOrder, OutgoingPurchaseOrderItem, OrderStatus, HazardObservationCard, CompanyClient
+from utils.models import Item, File, TempFile, Vendor, Contact, Employee, Product, OutgoingPurchaseOrder, OutgoingPurchaseOrderItem, OrderStatus, HazardObservationCard, CompanyClient, NCNP
 from werkzeug.security import check_password_hash, generate_password_hash
 import dash_mantine_components as dmc
 from dash import html, dcc
 from datetime import datetime
+import base64
+import datetime
+import io
+import numpy as np
+
+tag_display_name_mapping = {
+
+    #inventory
+    'item_name': 'Item Name',
+    'category': 'Category',
+    'quantity_available': 'Quantity Available',
+    'unit_price': 'Unit Price',
+    'total_value': 'Total Value',
+    'supplier_name': 'Supplier Name',
+    'supplier_contact': 'Supplier Contact',
+    'location': 'Location',
+    'date_of_acquisition': 'Date Of Acquisition',
+    'expiration_date': 'Expiration Date',
+    'condition': 'Condition',
+    'notes': 'Notes',
+
+    #clients
+    'vendor_name':'Vendor Name',
+    'vendor_address':'Vendor Address',
+    'vendor_type':'Vendor Type',
+
+    #po
+    'po_no':'PO No',
+    'order_date':'Order Date',
+    'total_amount':'Total Amount',
+    'status':'Status',
+    'issued_by':'Issued By',
+
+    #jobs
+    'job_title':'Job Title',
+    'plan_start_date':'Start Date (Plan)',
+    'plan_end_date':'End Date (Plan)',
+    'actual_start_date':'Start Date (Actual)',
+    'actual_end_date':'End Date (Actual)',
+    'job_service_type':'Job Service Type',
+    'job_desc':'Job Description',
+
+    #hoc
+    'area':'Area',
+    'hazard_tanggal_waktu':'Tanggal/Waktu',
+    'additional_info':'Additional Info',
+
+    #ncnp
+    'regional':'Regional',
+    'zona':'Zona',
+    'challenge_type':'Challenge Type',
+    'technology':'Teknologi yang diajukan',
+    'provider':'PROVIDER',
+    'pic':'PIC',
+    'description':'Description',
+}
+
+display_name_tag_mapping = {v: k for k, v in tag_display_name_mapping.items()}
 
 def get_clients_table():
 
@@ -40,6 +98,18 @@ def get_clients_table():
 
     return df
 
+def get_ncnps_table():
+
+    df = pd.read_sql_table(
+        'ncnp',
+        db.engine
+    )
+
+    df = df[['ncnp_id','regional','zona','challenge_type','technology','provider']]
+
+    df.columns = ['id'] + [ get_display_name(tag) for tag in df.columns[1:] ]
+
+    return df
 
 def get_jobs_table():
 
@@ -152,49 +222,6 @@ def get_employees_table():
 
 def get_display_name(tag):
 
-
-    tag_display_name_mapping = {
-
-        #inventory
-        'item_name': 'Item Name',
-        'category': 'Category',
-        'quantity_available': 'Quantity Available',
-        'unit_price': 'Unit Price',
-        'total_value': 'Total Value',
-        'supplier_name': 'Supplier Name',
-        'supplier_contact': 'Supplier Contact',
-        'location': 'Location',
-        'date_of_acquisition': 'Date Of Acquisition',
-        'expiration_date': 'Expiration Date',
-        'condition': 'Condition',
-        'notes': 'Notes',
-
-        #clients
-        'vendor_name':'Vendor Name',
-        'vendor_address':'Vendor Address',
-        'vendor_type':'Vendor Type',
-
-        #po
-        'po_no':'PO No',
-        'order_date':'Order Date',
-        'total_amount':'Total Amount',
-        'status':'Status',
-        'issued_by':'Issued By',
-
-        #jobs
-        'job_title':'Job Title',
-        'plan_start_date':'Start Date (Plan)',
-        'plan_end_date':'End Date (Plan)',
-        'actual_start_date':'Start Date (Actual)',
-        'actual_end_date':'End Date (Actual)',
-        'job_service_type':'Job Service Type',
-        'job_desc':'Job Description',
-
-        #hoc
-        'area':'Area',
-        'hazard_tanggal_waktu':'Tanggal/Waktu',
-        'additional_info':'Additional Info'
-    }
     return tag_display_name_mapping.get(tag,tag)
 
 def generate_id(amount=None):
@@ -1213,6 +1240,108 @@ def delete_HazardObservationCard(
     finally:
         session.close()
 
+def add_NCNP(
+    regional, 
+    zona, 
+    challenge_type, 
+    description, 
+    pic, 
+    technology, 
+    provider
+):
+    try:
+
+        Session = sessionmaker(bind=db.engine)
+        session = Session()
+
+        ncnp = NCNP(
+            regional, 
+            zona, 
+            challenge_type, 
+            description, 
+            pic, 
+            technology, 
+            provider
+        )
+
+        session.add(
+            ncnp
+        )
+
+        session.commit()
+
+    except Exception as err:
+
+        session.rollback()
+
+        raise err
+
+    finally:
+
+        session.close()
+
+def edit_NCNP(
+    ncnp_id,
+    regional, 
+    zona, 
+    challenge_type, 
+    description, 
+    pic, 
+    technology, 
+    provider
+):
+
+    try:
+
+        Session = sessionmaker(bind=db.engine)
+        session = Session()
+
+        ncnp = session.query(NCNP).filter(NCNP.ncnp_id == ncnp_id).first()
+
+
+        ncnp.regional = regional
+        ncnp.zona = zona
+        ncnp.challenge_type = challenge_type
+        ncnp.description = description
+        ncnp.pic = pic
+        ncnp.technology = technology
+        ncnp.provider = provider
+
+        session.commit()
+
+    except Exception as err:
+
+        session.rollback()
+
+        raise err
+
+    finally:
+
+        session.close()
+
+def delete_NCNP(
+    ncnp_id
+):
+    try:
+
+        Session = sessionmaker(bind=db.engine)
+        session = Session()
+
+        ncnp_to_delete = session.query(NCNP).filter(NCNP.ncnp_id == ncnp_id).first()
+
+        session.delete(ncnp_to_delete)
+
+        session.commit()
+
+    except Exception as err:
+
+        session.rollback()
+
+        raise err
+
+    finally:
+        session.close()
+
 def add_IndividualClient(
     name,
     title,
@@ -1430,3 +1559,61 @@ def delete_CompanyClient(
     finally:
         session.close()
 
+def add_bulk_ncnp(contents,filename):
+
+    content_type, content_string = contents.split(',')
+
+    decoded = base64.b64decode(content_string)
+    
+    if 'xls' in filename:
+        df = pd.read_excel(io.BytesIO(decoded))
+    else:
+        raise Exception('File format not accepted')
+    
+    required_tags = set(['Regional','Zona','Challenge Type','Description','PIC','Teknologi yang diajukan','PROVIDER'])
+
+    missing_tags = required_tags - set(df.columns)
+
+    if missing_tags:
+        raise ValueError(f"Missing required columns: {missing_tags}")
+    
+    new_columns = {col: display_name_tag_mapping[col] for col in df.columns if col in display_name_tag_mapping}
+    df.rename(columns=new_columns, inplace=True)
+    df = df.replace({np.nan: None})
+
+    try:
+
+        Session = sessionmaker(bind=db.engine)
+        session = Session()
+
+        ncnps = [
+            NCNP(
+                regional=data['regional'],
+                zona=data['zona'],
+                challenge_type=data['challenge_type'],
+                description=data['description'],
+                pic=data['pic'],
+                technology=data['technology'],
+                provider=data['provider']
+            )
+            for i, data in df.iterrows()
+        ]
+
+        session.add_all(
+            ncnps
+        )
+
+        session.commit()
+
+    except Exception as err:
+
+        session.rollback()
+
+        raise err
+
+    finally:
+
+        session.close()
+
+
+    return 
