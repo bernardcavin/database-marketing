@@ -34,7 +34,7 @@ HOST = os.getenv("dbHOST")
 DATABASE = os.getenv("dbDATABASE")
 
 app.server.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.server.config["SQLALCHEMY_DATABASE_URI"] = f"mysql://{USERNAME}:{PASSWORD}@{HOST}/{DATABASE}"
+app.server.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///database.db"
 app.server.config.update(SECRET_KEY=os.getenv("SECRET_KEY"))
 app.server.app_context().push()
 db.init_app(app.server)
