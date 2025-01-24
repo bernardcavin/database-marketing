@@ -9,6 +9,7 @@ import dash
 from dash import dcc, html, Input, Output, State
 import dash_mantine_components as dmc
 from utils.models import db, Employee
+from werkzeug.security import generate_password_hash
 
 dash._dash_renderer._set_react_version('18.2.0')
 
@@ -34,11 +35,15 @@ HOST = os.getenv("dbHOST")
 DATABASE = os.getenv("dbDATABASE")
 
 app.server.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.server.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///database.db"
+app.server.config["SQLALCHEMY_DATABASE_URI"] = f"mysql://{USERNAME}:{PASSWORD}@{HOST}/{DATABASE}"
 app.server.config.update(SECRET_KEY=os.getenv("SECRET_KEY"))
 app.server.app_context().push()
 db.init_app(app.server)
 db.create_all()
+
+if Employee.query.first() is None:
+    db.session.add(Employee(username='admin', password=generate_password_hash('admin'), admin=True, name='Admin', nik='123456789', position='Admin', email='admin@admin.com'))
+    db.session.commit()
 
 login_manager = LoginManager()
 login_manager.init_app(server)
